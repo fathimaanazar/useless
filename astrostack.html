@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Chat Bot</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .animals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .animal-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .animal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .animal-card.active {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+        }
+        
+        .animal-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .animal-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .animal-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .chat-section {
+            padding: 20px;
+            display: none;
+        }
+        
+        .chat-section.active {
+            display: block;
+        }
+        
+        .chat-header {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .chat-messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fafafa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            margin-left: 50px;
+            text-align: right;
+        }
+        
+        .animal-message {
+            background: #f3e5f5;
+            margin-right: 50px;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .message-input:focus {
+            border-color: #ff6b6b;
+        }
+        
+        .send-btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa726);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐾 Animal Chat Bot 🐾</h1>
+            <p>Choose an animal friend to chat with about their day!</p>
+        </div>
+        
+        <div id="animal-selection" class="animals-grid">
+            <div class="animal-card" onclick="selectAnimal('cookie')">
+                <span class="animal-emoji">😾</span>
+                <div class="animal-name">Cookie the Cat</div>
+                <div class="animal-desc">Sassy and superior</div>
+            </div>
+            
+            <div class="animal-card" onclick="selectAnimal('pudding')">
+                <span class="animal-emoji">🐕</span>
+                <div class="animal-name">Pudding the Dog</div>
+                <div class="animal-desc">Lovable golden retriever</div>
+            </div>
+            
+            <div class="animal-card" onclick="selectAnimal('peanut')">
+                <span class="animal-emoji">🐹</span>
+                <div class="animal-name">Peanut the Hamster</div>
+                <div class="animal-desc">Clumsy and innocent</div>
+            </div>
+            
+            <div class="animal-card" onclick="selectAnimal('cherry')">
+                <span class="animal-emoji">🐰</span>
+                <div class="animal-name">Cherry the Rabbit</div>
+                <div class="animal-desc">Sleepy and lazy</div>
+            </div>
+        </div>
+        
+        <div id="chat-section" class="chat-section">
+            <button class="back-btn" onclick="backToSelection()">← Back to Animals</button>
+            <div class="chat-header">
+                <h2 id="chat-title">Chat with Animal</h2>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="input-area">
+                <input type="text" id="message-input" class="message-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAnimal = null;
+        let chatMessages = [];
+
+        const animalData = {
+            cookie: {
+                name: "Cookie the Cat",
+                emoji: "😾",
+                personality: "sassy",
+                responses: {
+                    greeting: [
+                        "Oh great. Another human wants to talk to me.",
+                        "I suppose I can spare you a few minutes of my precious time.",
+                        "What do you want? I was busy being fabulous."
+                    ],
+                    day: [
+                        "My day was perfect until you interrupted it.",
+                        "I spent most of it judging humans. Very productive.",
+                        "I knocked some things off tables. Standard Tuesday.",
+                        "I had to train my humans again. They are so slow to learn."
+                    ],
+                    food: [
+                        "My food bowl was only 90% full. Completely unacceptable.",
+                        "I ate some expensive food. You probably cannot afford it.",
+                        "I watched my humans eat. Their food looks terrible."
+                    ],
+                    sleep: [
+                        "I slept 16 hours today. Still not enough.",
+                        "I chose the most inconvenient place to nap. The humans loved it.",
+                        "Sleep is for the superior beings like myself."
+                    ]
+                }
+            },
+            pudding: {
+                name: "Pudding the Dog",
+                emoji: "🐕",
+                personality: "loving",
+                responses: {
+                    greeting: [
+                        "Oh wow! A new friend! This is the best day ever!",
+                        "Hi hi hi! I love meeting new people!",
+                        "You seem amazing! I bet you give great belly rubs!"
+                    ],
+                    day: [
+                        "Today was incredible! I saw three squirrels and a butterfly!",
+                        "I played fetch for two hours. Best game ever invented!",
+                        "I made friends with a leaf. It blew away but I still love it.",
+                        "I got so many pets today. Each one was perfect."
+                    ],
+                    food: [
+                        "Food is the most wonderful thing! I love breakfast and dinner and treats!",
+                        "I dropped my food bowl and it made a great noise!",
+                        "My human shared a tiny piece of chicken. I am so blessed!"
+                    ],
+                    sleep: [
+                        "I love sleeping! Especially on the couch where I am not supposed to be!",
+                        "Dreams are great! I dreamed about running in fields forever!",
+                        "I sleep with all four paws in the air. Very comfortable!"
+                    ]
+                }
+            },
+            peanut: {
+                name: "Peanut the Hamster",
+                emoji: "🐹",
+                personality: "clumsy",
+                responses: {
+                    greeting: [
+                        "Oh! Hi there! I was just running and almost fell off my wheel!",
+                        "Hello! Sorry I am out of breath. I have been very busy running!",
+                        "Hi! I just stuffed my cheeks with food. Hard to talk!"
+                    ],
+                    day: [
+                        "I ran 5 miles on my wheel today! Well, I did not go anywhere though.",
+                        "I tried to climb up the cage bars and fell down three times.",
+                        "I buried some food in my bedding. Then I forgot where I put it.",
+                        "I spilled my water bowl again. The floor is very wet now."
+                    ],
+                    food: [
+                        "I stuffed so many sunflower seeds in my cheeks! Now I look funny!",
+                        "I dropped half my food on the floor. Five second rule though!",
+                        "I have food hidden everywhere. Sometimes I find old carrots in my bed."
+                    ],
+                    sleep: [
+                        "I tried to sleep but kept hearing noises. Probably just my own breathing.",
+                        "I built a nest but it fell apart when I got in it.",
+                        "Sleep is hard when you forget if you already closed your eyes or not."
+                    ]
+                }
+            },
+            cherry: {
+                name: "Cherry the Rabbit",
+                emoji: "🐰",
+                personality: "sleepy",
+                responses: {
+                    greeting: [
+                        "Mmm... oh hi. I was almost asleep there.",
+                        "Hello. This conversation better be worth staying awake for.",
+                        "Oh. A visitor. I guess I can stay awake for five more minutes."
+                    ],
+                    day: [
+                        "I spent most of the day in my favorite corner. Very relaxing.",
+                        "I hopped around for maybe ten minutes. That was enough exercise for the week.",
+                        "I stared at the wall for three hours today. Very peaceful.",
+                        "I considered cleaning my cage but decided tomorrow is better."
+                    ],
+                    food: [
+                        "I ate some lettuce very slowly. No need to rush good food.",
+                        "My hay is perfectly fine. Why would I want anything else.",
+                        "I nibbled on a carrot for about an hour. Very efficient eating."
+                    ],
+                    sleep: [
+                        "I had the most wonderful nap under my food bowl.",
+                        "Sleep is my specialty. I am very good at it.",
+                        "I dreamed about sleeping. It was a great dream."
+                    ]
+                }
+            }
+        };
+
+        function selectAnimal(animal) {
+            currentAnimal = animal;
+            document.getElementById('animal-selection').style.display = 'none';
+            document.getElementById('chat-section').style.display = 'block';
+            document.getElementById('chat-title').textContent = `Chat with ${animalData[animal].name} ${animalData[animal].emoji}`;
+            
+            chatMessages = [];
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            // Send greeting
+            setTimeout(() => {
+                const greeting = getRandomResponse(animal, 'greeting');
+                addMessage(greeting, 'animal');
+            }, 500);
+        }
+
+        function backToSelection() {
+            document.getElementById('animal-selection').style.display = 'grid';
+            document.getElementById('chat-section').style.display = 'none';
+            currentAnimal = null;
+            document.getElementById('message-input').value = '';
+        }
+
+        function getRandomResponse(animal, category) {
+            const responses = animalData[animal].responses[category];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function generateResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            const animal = currentAnimal;
+            
+            // Check for specific topics
+            if (message.includes('day') || message.includes('today') || message.includes('doing')) {
+                return getRandomResponse(animal, 'day');
+            } else if (message.includes('food') || message.includes('eat') || message.includes('hungry')) {
+                return getRandomResponse(animal, 'food');
+            } else if (message.includes('sleep') || message.includes('tired') || message.includes('nap')) {
+                return getRandomResponse(animal, 'sleep');
+            } else if (message.includes('hello') || message.includes('hi')) {
+                return getRandomResponse(animal, 'greeting');
+            }
+            
+            // Default responses based on personality
+            const defaultResponses = {
+                cookie: [
+                    "I do not have time for this nonsense.",
+                    "That is not very interesting to me.",
+                    "Whatever you say, human.",
+                    "I have better things to do than discuss this."
+                ],
+                pudding: [
+                    "That sounds amazing! Tell me more!",
+                    "Wow! You are so interesting!",
+                    "I love talking with you!",
+                    "Everything you say makes me happy!"
+                ],
+                peanut: [
+                    "Oh! I think I understand! Maybe! I got distracted by my wheel!",
+                    "That reminds me of when I dropped my food! Wait, what were we talking about?",
+                    "I tried to do something like that once but I fell over!",
+                    "Sorry, I was stuffing my cheeks while you talked!"
+                ],
+                cherry: [
+                    "Mmm hmm. That sounds like a lot of work.",
+                    "I think I understand. Can we talk about this later though?",
+                    "That is nice. I might think about it during my next nap.",
+                    "Sure sure. I am getting sleepy just thinking about it."
+                ]
+            };
+            
+            return defaultResponses[animal][Math.floor(Math.random() * defaultResponses[animal].length)];
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'animal') {
+                messageDiv.innerHTML = `<strong>${animalData[currentAnimal].name}:</strong> ${text}`;
+            } else {
+                messageDiv.innerHTML = `<strong>You:</strong> ${text}`;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (message === '' || !currentAnimal) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Simulate thinking time
+            setTimeout(() => {
+                const response = generateResponse(message);
+                addMessage(response, 'animal');
+            }, 800 + Math.random() * 1200);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
